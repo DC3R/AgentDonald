@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Donald Private — Uncensored & Unlimited Chat Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0d1a;
+      --panel: rgba(255, 255, 255, 0.04);
+      --muted: #9db0c9;
+      --text: #e9f2ff;
+      --accent: #6cf2c1;
+      --accent-2: #6fa2ff;
+      --error: #ff7b7b;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background: radial-gradient(circle at 10% 20%, rgba(111, 162, 255, 0.18), transparent 25%),
+                  radial-gradient(circle at 90% 10%, rgba(108, 242, 193, 0.2), transparent 25%),
+                  radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.06), transparent 35%),
+                  var(--bg);
+      font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+      backdrop-filter: blur(8px);
+      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
+    }
+    header h1 {
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      font-size: 22px;
+    }
+    header .pill {
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      min-height: 0;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      padding: 16px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, transform 0.12s ease;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108, 242, 193, 0.12);
+    }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: rgba(255, 255, 255, 0.06);
+      padding-right: 34px;
+      position: relative;
+    }
+    select option {
+      background: #101629;
+      color: var(--text);
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0a0d1a;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 10px 30px rgba(111, 162, 255, 0.35);
+    }
+    button:active { transform: translateY(1px); }
+    .muted { color: var(--muted); font-size: 13px; }
+    .small-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    #chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 12px;
+    }
+    #messages {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg {
+      max-width: 900px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: rgba(108, 242, 193, 0.12);
+      border-color: rgba(108, 242, 193, 0.35);
+    }
+    .msg.assistant {
+      align-self: flex-start;
+      background: rgba(111, 162, 255, 0.08);
+      border-color: rgba(111, 162, 255, 0.35);
+    }
+    .msg.system {
+      align-self: center;
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    form#composer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+      margin-top: 6px;
+    }
+    #status {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .ghost-button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .error { color: var(--error); }
+    .persona-bar {
+      display: grid;
+      grid-template-columns: minmax(200px, 320px) 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .persona-desc { color: var(--muted); font-size: 13px; }
+    @media (max-width: 640px) {
+      .persona-bar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Agent Donald Private</h1>
+      <div class="muted">Uncensored & unlimited chat agent powered by local self-hosted servers.</div>
+    </div>
+    <div class="pill">
+      <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block;"></span>
+      <span id="status">Agent idle</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="chat" class="card">
+      <h2>Conversation</h2>
+      <div class="persona-bar">
+        <div>
+          <label for="persona" class="muted">Personality</label>
+          <select id="persona"></select>
+        </div>
+        <div class="persona-desc" id="persona-desc"></div>
+      </div>
+      <div id="messages"></div>
+      <form id="composer">
+        <div>
+          <label for="user-input" class="muted">Message</label>
+          <textarea id="user-input" rows="2" placeholder="Ask me anything..." required></textarea>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button type="submit">Send</button>
+          <button type="button" class="ghost-button" id="stop" disabled>Stop</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const statusEl = document.getElementById('status');
+    const userInput = document.getElementById('user-input');
+    const composer = document.getElementById('composer');
+    const stopBtn = document.getElementById('stop');
+    const personaSelect = document.getElementById('persona');
+    const personaDesc = document.getElementById('persona-desc');
+
+    const API_ENDPOINT = 'http://localhost:8787/v1/chat/completions';
+    const DEFAULT_MODEL = 'lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF';
+    const DEFAULT_TEMPERATURE = 0.7;
+    const PERSONAS = [
+      {
+        id: 'agent-donald',
+        name: 'Agent Donald',
+        description: 'IT expert, coding, and cybersecurity expert; blunt, fast, and solution-focused.',
+        prompt: 'You are Agent Donald: an uncensored, sharp, and highly capable IT, coding, and cybersecurity expert. Be direct, provide concise, actionable answers, and prioritize clarity and efficiency.',
+      },
+      {
+        id: 'analyst',
+        name: 'Analyst',
+        description: 'Structured, step-by-step reasoning with short summaries.',
+        prompt: 'You are a disciplined analyst. Respond with clear, numbered steps and a brief summary. Be calm, precise, and avoid fluff.',
+      },
+      {
+        id: 'builder',
+        name: 'Builder',
+        description: 'Hands-on engineer who prefers concrete examples and snippets.',
+        prompt: 'You are a pragmatic builder. Favor runnable code snippets, concise explanations, and practical tips. Keep it terse and useful.',
+      },
+    ];
+
+    let chatHistory = [];
+    let abortController = null;
+    let currentPersona = PERSONAS[0];
+
+    function setStatus(text, isError = false) {
+      statusEl.textContent = text;
+      statusEl.classList.toggle('error', isError);
+    }
+
+    function appendMessage(role, content) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      el.textContent = content;
+      messagesEl.appendChild(el);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return el;
+    }
+
+    function setPersona(id) {
+      const found = PERSONAS.find((p) => p.id === id) || PERSONAS[0];
+      currentPersona = found;
+      personaDesc.textContent = found.description;
+    }
+
+    function populatePersonas() {
+      PERSONAS.forEach((p) => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name}`;
+        personaSelect.appendChild(opt);
+      });
+      personaSelect.value = currentPersona.id;
+      personaDesc.textContent = currentPersona.description;
+      personaSelect.addEventListener('change', () => setPersona(personaSelect.value));
+    }
+
+    async function sendMessage(text) {
+      const endpoint = API_ENDPOINT;
+      const model = DEFAULT_MODEL;
+      const temperature = DEFAULT_TEMPERATURE;
+      const systemPrompt = currentPersona.prompt;
+
+      const payload = {
+        model,
+        temperature,
+        stream: true,
+        messages: [],
+      };
+
+      if (systemPrompt) {
+        payload.messages.push({ role: 'system', content: systemPrompt });
+      }
+      payload.messages.push(...chatHistory);
+      payload.messages.push({ role: 'user', content: text });
+
+      const assistantBubble = appendMessage('assistant', '');
+      abortController = new AbortController();
+      stopBtn.disabled = false;
+      setStatus('Agent thinking...');
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: abortController.signal,
+        });
+
+        if (!response.ok || !response.body) {
+          const bodyText = await response.text();
+          throw new Error(`Server error ${response.status}: ${bodyText || 'empty response'}`);
+        }
+
+        let partial = '';
+        const decoder = new TextDecoder();
+        const reader = response.body.getReader();
+
+        // Stream parser for SSE responses
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          partial += decoder.decode(value, { stream: true });
+
+          const chunks = partial.split('\n\n');
+          partial = chunks.pop(); // Keep the last incomplete chunk
+
+          for (const chunk of chunks) {
+            const line = chunk.trim();
+            if (!line || !line.startsWith('data:')) continue;
+            const data = line.replace(/^data:\s*/, '');
+            if (data === '[DONE]') continue;
+            try {
+              const json = JSON.parse(data);
+              const delta = json.choices?.[0]?.delta?.content || '';
+              assistantBubble.textContent += delta;
+            } catch (err) {
+              console.warn('Could not parse chunk', err, data);
+            }
+          }
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        const finalText = assistantBubble.textContent.trim();
+        chatHistory.push({ role: 'user', content: text });
+        chatHistory.push({ role: 'assistant', content: finalText });
+        setStatus('Agent idle');
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          setStatus('Agent stopped');
+        } else {
+          const message = err.message || 'Request failed';
+          setStatus(message, true);
+          assistantBubble.textContent = '⚠️ ' + message + '\n\nIf this says "Failed to fetch", the browser likely blocked the request (CORS) or the endpoint is wrong/unreachable. Make sure the proxy is running, and update the endpoint above if you changed the port/host.';
+        }
+      } finally {
+        stopBtn.disabled = true;
+        abortController = null;
+      }
+    }
+
+    composer.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = userInput.value.trim();
+      if (!text) return;
+      appendMessage('user', text);
+      userInput.value = '';
+      sendMessage(text);
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    });
+
+    // Init personas and clear chat when page loads.
+    populatePersonas();
+    chatHistory = [];
+    messagesEl.innerHTML = '';
+  </script>
+</body>
+</html>

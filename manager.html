@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LM Studio Control Panel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #0b1020;
+      color: #e8f0ff;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .panel {
+      width: min(960px, 100%);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
+    }
+    h1 { margin: 0 0 8px; }
+    p { margin: 0 0 12px; color: #9db0c9; }
+    label { display: block; margin-top: 12px; font-size: 14px; color: #cbd7eb; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      color: #e8f0ff;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus { border-color: #6cf2c1; box-shadow: 0 0 0 3px rgba(108,242,193,0.15); }
+    .row { display: grid; grid-template-columns: 2fr 1fr auto auto; gap: 10px; align-items: end; margin-top: 12px; }
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      color: #0b1020;
+      background: linear-gradient(135deg, #6cf2c1, #6fa2ff);
+      box-shadow: 0 10px 30px rgba(111,162,255,0.35);
+    }
+    button.secondary {
+      background: transparent;
+      color: #e8f0ff;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: none;
+    }
+    .status {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      color: #cbd7eb;
+    }
+    .links { margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+    a {
+      color: #6cf2c1;
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px dashed rgba(108,242,193,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>LM Studio Control Panel</h1>
+    <p>Start/stop the local CORS proxy and launch the chat UI.</p>
+
+    <label for="target">Target LM Studio base URL</label>
+    <input id="target" value="http://26.72.213.218:1234" spellcheck="false">
+
+    <label for="proxyPort">Proxy port</label>
+    <input id="proxyPort" value="8787" spellcheck="false">
+
+    <div class="row">
+      <button id="start">Start proxy</button>
+      <button id="stop" class="secondary">Stop proxy</button>
+      <button id="openChat" class="secondary">Open chat UI</button>
+      <button id="openProxy" class="secondary">Open proxy endpoint</button>
+    </div>
+
+    <div class="links">
+      <span>Chat endpoint to use in the UI: <code id="endpointText">http://localhost:8787/v1/chat/completions</code></span>
+    </div>
+
+    <div class="status" id="statusBox">Status: loading...</div>
+  </div>
+
+  <script>
+    const targetInput = document.getElementById('target');
+    const portInput = document.getElementById('proxyPort');
+    const statusBox = document.getElementById('statusBox');
+    const endpointText = document.getElementById('endpointText');
+    const openChatBtn = document.getElementById('openChat');
+    const openProxyBtn = document.getElementById('openProxy');
+
+    function endpointUrl() {
+      return `http://localhost:${portInput.value || 8787}/v1/chat/completions`;
+    }
+
+    function renderEndpoint() {
+      endpointText.textContent = endpointUrl();
+    }
+
+    async function api(path, method = 'GET') {
+      const res = await fetch(path, { method });
+      return res.json();
+    }
+
+    async function refreshStatus() {
+      try {
+        const data = await api('/api/status');
+        const lines = [
+          `Running: ${data.running}`,
+          `Target: ${data.target || '-'}`,
+          `Proxy port: ${data.port || '-'}`,
+          `PID: ${data.pid || '-'}`,
+          `Chat endpoint: ${endpointUrl()}`,
+          data.running ? 'Point the chat UI to the endpoint above.' : 'Start the proxy to enable browser access.',
+        ];
+        statusBox.textContent = lines.join('\n');
+      } catch (err) {
+        statusBox.textContent = 'Error loading status: ' + err.message;
+      }
+    }
+
+    document.getElementById('start').addEventListener('click', async () => {
+      const target = targetInput.value.trim();
+      const port = portInput.value.trim() || '8787';
+      try {
+        await api(`/api/start?target=${encodeURIComponent(target)}&port=${encodeURIComponent(port)}`, 'POST');
+        renderEndpoint();
+        refreshStatus();
+      } catch (err) {
+        statusBox.textContent = 'Start failed: ' + err.message;
+      }
+    });
+
+    document.getElementById('stop').addEventListener('click', async () => {
+      try {
+        await api('/api/stop', 'POST');
+        refreshStatus();
+      } catch (err) {
+        statusBox.textContent = 'Stop failed: ' + err.message;
+      }
+    });
+
+    openChatBtn.addEventListener('click', () => {
+      window.open('/index.html', '_blank');
+    });
+
+    openProxyBtn.addEventListener('click', () => {
+      window.open(endpointUrl(), '_blank');
+    });
+
+    renderEndpoint();
+    refreshStatus();
+    setInterval(refreshStatus, 4000);
+  </script>
+</body>
+</html>
